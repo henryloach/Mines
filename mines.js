@@ -7,41 +7,39 @@ function main(map,n) {
 
   initActive();
 
-  let i = 1;
   do {
     loop();
-
     if (hasChanged == false && nMines != 0) {
       let n = activeElements.length;
       while (n--) { // try templates
-
-        //template1(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) break;
-        template2(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) break;
+        if (hasChanged == true) { updateValues(); break; }
         template3(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) break;
+        if (hasChanged == true) { updateValues(); break; }
         template4(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) break;
+        if (hasChanged == true) { updateValues(); break; }
+        template5(activeElements[n][0], activeElements[n][1]);
+        if (hasChanged == true) { updateValues(); break; }
       }
 
 
-      if (hasChanged == false && nMines <+ 5) {console.log("entering tryFinal"); tryFinal();}
+      if (hasChanged == false && nMines <= 5) {console.log("Trying final.");tryFinal();}
     }
-    console.log("at the end of " + i + " haschanged = " + hasChanged);
-    console.log("State: ");
-    console.log("N mines: " + nMines + "\n");
-    print(values);
-    i++;
-  } while (hasChanged == true && numUnknowns != 0);
 
+  } while (hasChanged == true && numUnknowns > 0);
 
   console.log("\nResult:\n");
-  if (nMines == 0 && numUnknowns == 0) console.log("..Complete..");
-  else console.log("..?..");
-  console.log("\nFinal state:\n");
-  print(arr);
-
+  if (nMines == 0 && numUnknowns == 0) {
+    console.log("..Complete..");
+    console.log("\nFinal state:\n");
+    print(arr);
+    return arrToStr(arr);
+  } else {
+    console.log("..?..");
+    console.log("\nFinal state:\n");
+    print(arr);
+    console.log(`Mines remaining: ${nMines}`);
+    return "?";
+  }
 }
 
 function loop() {
@@ -86,7 +84,6 @@ function openTile(row, col) {
   activeElements.push([row, col]);
   numUnknowns -= 1;
   hasChanged = true;
-  //console.log("opening a square");
 }
 
 function updateUnknowns() {
@@ -184,100 +181,10 @@ if (values[row][col] == "x") throw "called get values on a mine"
   }
 }
 
-// function getValues(row, col) {
-//   if (values[row][col] == "x") throw "called get values on a mine"
-//   values[row][col] = 0;
-//   for (let i = row - 1; i <= row + 1; i++) {
-//     for (let j = col - 1; j <= col + 1; j++) {
-//       if (i == row && j == col) continue;
-//       if (checkBounds(i, j) == false) continue;
-//       if (arr[i][j] == "x") {
-//         values[row][col] += 1;
-//       }
-//     }
-//   }
-// }
-
-//    # . . o
-//    # 1 1 1
-//    # * * *
-function template1(row, col) {
-  console.log(`template 1 running at row: ${row} j: ${col}`);
-  if (values[row][col] != 1) return;
-  if (checkRow(row, col) == true) {
-    if (leftWall(row, col) == true) {
-      if      (belowBlocked(row, col) == true && aboveOpen(row, col)) openTile(row - 1, col + 1);
-      else if (aboveBlocked(row, col) == true && belowOpen(row, col)) openTile(row + 1, col + 1);
-//      else {console.log(`template 1 fails at i: ${row} j: ${col}`);  print(values); show(row,col); throw "logic error";}
-    }
-    else if (rightWall(row, col) == true) {
-      if      (belowBlocked(row, col) == true && aboveOpen(row, col)) openTile(row - 1, col - 1);
-      else if (aboveBlocked(row, col) == true && belowOpen(row, col)) openTile(row + 1, col - 1);
-//      else throw "logic error";
-    }
-  }
-  else if (checkCol(row, col) == true) {
-    if (upperWall(row, col) == true) {
-      if      (leftBlocked(row, col) == true && rightOpen(row, col)) openTile(row + 1, col + 1);
-      else if (rightBlocked(row, col) == true && leftOpen(row, col)) openTile(row + 1, col - 1);
-//      else throw "logic error";
-    }
-    else if (lowerWall(row, col) == true) {
-      if      (leftBlocked(row, col) == true && rightOpen(row, col)) openTile(row - 1, col + 1);
-      else if (rightBlocked(row, col) == true && leftOpen(row, col)) openTile(row - 1, col - 1);
-//    else throw "logic error";
-    }
-  }
-}
-
-//    ! o !
-//    1 2 1
-//    # # #    // opens the middle tile and allows the loop algorithm to continue
-function template2(row, col) {
-  console.log(`template 2 running at row: ${row} j: ${col}`);
-  if (values[row][col] != 2) return;
-  if      (checkRow(row, col) == true) {
-    if      (belowBlocked(row, col) == true && aboveOpen(row, col)) openTile(row - 1, col);
-    else if (aboveBlocked(row, col) == true && belowOpen(row, col)) openTile(row + 1, col);
-  //  else throw "logic error";
-  }
-  else if (checkCol(row, col) == true) {
-    if      (leftBlocked(row, col) == true && rightOpen(row, col)) openTile(row, col + 1);
-    else if (rightBlocked(row, col) == true && leftOpen(row, col)) openTile(row, col - 1);
-  //  else throw "logic error";
-  }
-}
-
 //    * . . o
 //    * 1 1 %
 //    * * * *
-// function template3(row, col) {
-//   console.log(`template 3 running at row: ${row} j: ${col}`);
-//   if (values[row][col] != 1) return;
-//     if (checkRowRight(row, col) == true && rightWall(row, col) && arr[row][col - 1] != "?") {
-//       if      (belowBlocked(row, col) == true && aboveOpen(row, col)) openTile(row - 1, col - 1);
-//       else if (aboveBlocked(row, col) == true && belowOpen(row, col)) openTile(row + 1, col - 1);
-//     //  else throw "logic error";
-//     }
-//     else if (checkRowLeft(row, col) == true && leftWall(row, col) && arr[row][col + 1] != "?") {
-//       if      (belowBlocked(row, col) == true && aboveOpen(row, col)) openTile(row - 1, col + 1);
-//       else if (aboveBlocked(row, col) == true && belowOpen(row, col)) openTile(row + 1, col + 1);
-//     //  else throw "logic error";
-//     }
-//     else if (checkColUp(row, col) == true && upperWall(row, col) && arr[row + 1][col] != "?") {
-//       if      (leftBlocked(row, col) == true && rightOpen(row, col)) openTile(row + 1, col + 1);
-//       else if (rightBlocked(row, col) == true && leftOpen(row, col)) openTile(row + 1, col - 1);
-//     //  else throw "logic error";
-//     }
-//     else if (checkColDown(row, col) == true && lowerWall(row, col) && arr[row - 1][col] != "?") {
-//       if      (leftBlocked(row, col) == true && rightOpen(row, col)) openTile(row - 1, col + 1);
-//       else if (rightBlocked(row, col) == true && leftOpen(row, col)) openTile(row - 1, col - 1);
-//     // else throw "logic error";
-//     }
-// }
-
-function template3(row, col) {
-  console.log("starting temp3");
+function template1(row, col) {
   let flag;
   if ( values[row][col] != 1 ) return;
 
@@ -305,28 +212,63 @@ function template3(row, col) {
   else if ( !upperWall(row, col)   ) flag = false;
   if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
     openTile(row + 1, col + 1); return; }
-  if ( (flag) && belowOpen(row, col) && aboveBlocked(row, col) ) {
+  if ( (flag) && leftOpen(row, col) && rightBlocked(row, col) ) {
     openTile(row + 1, col - 1); return; }
 
-  console.log("passed other geoms");
+  flag = true;
+  if      ( !isOne(row + 1, col)   ) flag = false;
+  else if ( !notWall(row - 1, col) ) flag = false;
+  else if ( !lowerWall(row, col)   ) flag = false;
+  if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
+    openTile(row - 1, col + 1); return; }
+  if ( (flag) && leftOpen(row, col) && rightBlocked(row, col) ) {
+    openTile(row - 1, col - 1); return; }
+}
+
+//    ! . .
+//    * 2 1
+//    * * *
+function template2(row, col) {
+  let flag;
+  if ( values[row][col] != 2 ) return;
 
   flag = true;
-  if      ( !isOne(row + 1, col)   ) {flag = false; console.log("notOne");}
-  else if ( !notWall(row - 1, col) ) {flag = false; console.log("notWall");}
-  else if ( !lowerWall(row, col)   ) {flag = false; console.log("notLowerWall");}
-  console.log("flag = " + flag);
-  if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
-    openTile(row - 1, col + 1); console.log("we should be here");return; }
+  if  ( !isOne(row, col - 1)     ) flag = false;
+  else if  ( !notHidden(row, col + 1) ) flag = false;
+  if ( (flag) && aboveOpen(row, col) && belowBlocked(row, col) ) {
+    markMine(row - 1, col + 1); return; }
   if ( (flag) && belowOpen(row, col) && aboveBlocked(row, col) ) {
-    openTile(row - 1, col - 1); return; }
-  else console.log("didn't work");
+    markMine(row + 1, col + 1); return; }
+
+  flag = true;
+  if  ( !isOne(row, col + 1)     ) flag = false;
+  else if  ( !notHidden(row, col - 1) ) flag = false;
+  if ( (flag) && aboveOpen(row, col) && belowBlocked(row, col) ) {
+    markMine(row - 1, col - 1); return; }
+  if ( (flag) && belowOpen(row, col) && aboveBlocked(row, col) ) {
+    markMine(row + 1, col - 1); return; }
+
+  flag = true;
+  if  ( !isOne(row - 1, col)     ) flag = false;
+  else if  ( !notHidden(row + 1, col) ) flag = false;
+  if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
+    markMine(row + 1, col + 1); return; }
+  if ( (flag) && leftOpen(row, col) && rightBlocked(row, col) ) {
+    markMine(row + 1, col - 1); return; }
+
+  flag = true;
+  if  ( !isOne(row + 1, col)     ) flag = false;
+  else if  ( !notHidden(row + 1, col) ) flag = false;
+  if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
+    markMine(row - 1, col + 1); return; }
+  if ( (flag) && leftOpen(row, col) && rightBlocked(row, col) ) {
+    markMine(row - 1, col - 1); return; }
 }
 
 //    o ! ! o
 //    1 2 2 1
 //    * * * *
-function template4(row ,col) {
-  //console.log(`template 3 running at row: ${row} j: ${col}`);
+function template3(row ,col) {
   if (values[row][col] != 2) return;
 
   let flag = true; //right flat
@@ -385,6 +327,15 @@ function template4(row ,col) {
 
 function tryFinal() {
   let remUnks = getRemainingUnknowns();
+
+  if (remUnks.length == nMines) { // if remaining unmarked squares = num mines, fill them in
+    for (let m = 0; m < remUnks.length; m++) {
+      let mine = remUnks[m];
+      markMine(mine[0], mine[1]);
+    }
+    return;
+  }
+
   let combos = combinations(remUnks, nMines);
   let legals = []
   for (let n = 0; n < combos.length; n++) {
@@ -409,19 +360,47 @@ function tryFinal() {
       }
     }
     updateValues();
-    //forceValues();
   }
-  console.log(legals);
+
   if (legals.length == 1) { // check for one legal combo
-    console.log("one legal");
     let mineList = legals[0];
     for (let m = 0; m < mineList.length; m++) {
       let mine = mineList[m];
       markMine(mine[0], mine[1]);
     }
-    updateValues();
+  } else { //Check for remaining unknowns not on any legal minelist, these are safe.
+    let safeList = calcSafe(remUnks, legals);
+    for (let i = 0; i < safeList.length; i++) {
+      let safe = safeList[i];
+      openTile(safe[0], safe[1]);
+    }
   }
-  console.log("at the end of final, haschanged = " + hasChanged);
+  updateValues();
+}
+
+function calcSafe(remUnks, legals) {
+  let safeList = remUnks;
+  let i = safeList.length;
+
+  while (i--) {
+    loop1:
+    for (let n = 0; n < legals.length; n++) {
+      let mineList = legals[n];
+      for (let m = 0; m < mineList.length; m++) {
+        if ( isEqual(mineList[m], safeList[i]) ) {
+          safeList.splice(i, 1);
+          break loop1;
+        }
+      }
+    }
+  }
+  return safeList;
+}
+
+function isEqual(arr1, arr2) {
+  if ( arr1[0] != arr2[0] ) return false;
+  if ( arr1[1] != arr2[1] ) return false;
+  return true;
 }
 
 function getRemainingUnknowns() {
@@ -489,7 +468,7 @@ function lowerWall(row, col) {
   if (checkBounds(row + 2, col + 1) == false) flag = true;
   else if (values[row + 2][col + 1] == "?") return false;
   if (checkBounds(row + 2, col - 1) == false) flag = true;
-  else if (values[row + 2][col] == "?") return flase;
+  else if (values[row + 2][col - 1] == "?") return false;
   return flag;
 }
 
@@ -500,7 +479,7 @@ function upperWall(row, col) {
   if (checkBounds(row - 2, col + 1) == false) flag = true;
   else if (values[row - 2][col + 1] == "?") return false;
   if (checkBounds(row - 2, col - 1) == false) flag = true;
-  else if (values[row - 2][col] == "?") return flase;
+  else if (values[row - 2][col - 1] == "?") return false;
   return flag;
 }
 
@@ -512,14 +491,12 @@ function checkRow(row, col) {
 
 function checkRowLeft(row, col) {
   if (checkBounds(row, col - 1) == false) return false;
-  // else if (activeElements.includes([row, col]) == false) return false
   else if (values[row][col - 1] != 1)          return false;
   else return true;
 }
 
 function checkRowRight(row, col) {
   if      (checkBounds(row, col + 1) == false) return false;
-  // else if (activeElements.includes([row, col]) == false) return false
   else if (values[row][col + 1] != 1)          return false;
   else return true;
 }
@@ -532,14 +509,12 @@ function checkCol(row, col) {
 
 function checkColUp(row, col) {
   if      (checkBounds(row - 1, col) == false) return false;
-  // else if (activeElements.includes([row, col]) == false) return false
   else if (values[row - 1][col] != 1)          return false;
   else return true;
 }
 
 function checkColDown(row, col) {
   if      (checkBounds(row + 1, col) == false) return false;
-  // else if (activeElements.includes([row, col]) == false) return false
   else if (values[row + 1][col] != 1)          return false;
   else return true;
 }
@@ -609,7 +584,7 @@ function rightOpen(row, col) {
 }
 
 function notHidden(row, col) {
-  if (!checkBounds(row, cow)) return true;
+  if (!checkBounds(row, col)) return true;
   else if (arr[row][col] != "?") return true;
   else return false;
 }
@@ -709,26 +684,37 @@ function countMines() { //// DEBUG:
 }
 
 var map=
-`0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ? ? ?
-0 0 0 0 ? ? ? 0 0 ? ? ? 0 ? ? ? ? ?
-0 0 ? ? ? ? ? 0 0 ? ? ? 0 ? ? ? ? ?
-0 0 ? ? ? ? ? 0 ? ? ? ? ? ? ? ? ? ?
-0 0 ? ? ? ? 0 0 ? ? ? ? ? ? ? ? ? ?
-0 0 0 0 0 0 0 0 ? ? ? ? ? ? ? ? ? ?`,
+`0 0 0 0 0 0 0 ? ? ?
+? ? ? ? ? ? 0 ? ? ?
+? ? ? ? ? ? 0 ? ? ?
+? ? ? ? ? ? 0 ? ? ?
+0 0 ? ? ? ? ? ? 0 0
+0 0 ? ? ? ? ? ? ? ?
+0 0 ? ? ? ? ? ? ? ?
+0 0 0 0 ? ? ? ? ? ?
+0 0 0 0 ? ? ? ? ? ?
+0 0 0 ? ? ? ? 0 0 0
+0 0 0 ? ? ? ? 0 0 0
+0 0 0 ? ? ? ? 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+? ? 0 ? ? ? 0 0 0 0
+? ? 0 ? ? ? 0 0 0 0
+? ? ? ? ? ? ? ? ? 0
+? ? ? ? ? ? ? ? ? ?
+? ? ? ? ? ? ? ? ? ?
+0 0 ? ? ? 0 0 ? ? ?
+0 0 ? ? ? ? ? ? ? ?
+0 0 ? ? ? ? ? ? ? ?
+0 0 0 0 0 ? ? ? ? ?`,
 result=
-`0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
-0 0 0 0 1 1 1 0 0 1 1 1 0 1 1 3 x 2
-0 0 1 2 3 x 1 0 0 1 x 1 0 1 x 3 x 2
-0 0 1 x x 2 1 0 1 2 2 2 1 2 2 4 3 2
-0 0 1 2 2 1 0 0 1 x 1 1 x 1 1 x x 1
-0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 2 2 1`
-
+'0 0 0 0 0 0 0 1 1 1\n1 1 1 1 1 1 0 2 x 2\n1 x 2 2 x 1 0 2 x 2\n1 1 2 x 2 1 0 1 1 1\n0 0 2 2 2 1 1 1 0 0\n0 0 1 x 1 1 x 2 1 1\n0 0 1 1 2 2 2 3 x 2\n0 0 0 0 1 x 1 2 x 2\n0 0 0 0 1 1 1 1 1 1\n0 0 0 1 2 2 1 0 0 0\n0 0 0 1 x x 1 0 0 0\n0 0 0 1 2 2 1 0 0 0\n0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 0\nx 1 0 1 x 1 0 0 0 0\n2 3 1 3 2 2 1 1 1 0\nx 2 x 2 x 1 1 x 2 1\n1 2 1 2 1 1 1 2 x 1\n0 0 1 1 1 0 0 1 1 1\n0 0 1 x 1 1 1 2 2 2\n0 0 1 1 1 1 x 2 x x\n0 0 0 0 0 1 1 2 2 2'
 function open(i, j) {
   if (resArr[i][j] == "x") {
     console.log(`opened ${i} ${j} and found ${resArr[i][j]}`);
     throw "Opened a Mine!";
   } else {
-    //console.log(`opened ${i} ${j} and found ${resArr[i][j]}`);
+    console.log(`opened ${i} ${j} and found ${resArr[i][j]}`);
     return resArr[i][j];
   }
 }
