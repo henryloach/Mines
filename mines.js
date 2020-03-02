@@ -13,16 +13,16 @@ function main(map,n) {
       let n = activeElements.length;
       while (n--) { // try templates
         if (hasChanged == true) { updateValues(); break; }
+        template1(activeElements[n][0], activeElements[n][1]);
+        if (hasChanged == true) { updateValues(); break; }
+        template2(activeElements[n][0], activeElements[n][1]);
+        if (hasChanged == true) { updateValues(); break; }
         template3(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) { updateValues(); break; }
-        template4(activeElements[n][0], activeElements[n][1]);
-        if (hasChanged == true) { updateValues(); break; }
-        template5(activeElements[n][0], activeElements[n][1]);
         if (hasChanged == true) { updateValues(); break; }
       }
 
-
-      if (hasChanged == false && nMines <= 5) {console.log("Trying final.");tryFinal();}
+      // Try final solver.
+      if (hasChanged == false && nMines <= 5) { console.log("Trying final."); tryFinal(); }
     }
 
   } while (hasChanged == true && numUnknowns > 0);
@@ -126,10 +126,8 @@ function setMines(row, col) {
 
 function markMine(row, col) {
   if (arr[row][col] != "?") {
-    console.log(`tried to mark as a mine something that wasn't a ? at i: ${row} j: ${col} is was infact a ${arr[row][col]}`);
     return;
   }
-  //if (resArr[row][col] != "x") throw `marked a safe square as a mines at i: ${row} j: ${col}`; //// DEBUG:
   arr[row][col] = "x";
   values[row][col] = "x";
   nMines -= 1;
@@ -139,7 +137,6 @@ function markMine(row, col) {
 
 function revertMine(row, col) {
   if (arr[row][col] != "x") {
-    console.log(`tried to revert not a mine at i: ${row} j: ${col}, is was infact a ${arr[row][col]}`);
     return;
   }
   arr[row][col] = "?";
@@ -711,10 +708,8 @@ result=
 '0 0 0 0 0 0 0 1 1 1\n1 1 1 1 1 1 0 2 x 2\n1 x 2 2 x 1 0 2 x 2\n1 1 2 x 2 1 0 1 1 1\n0 0 2 2 2 1 1 1 0 0\n0 0 1 x 1 1 x 2 1 1\n0 0 1 1 2 2 2 3 x 2\n0 0 0 0 1 x 1 2 x 2\n0 0 0 0 1 1 1 1 1 1\n0 0 0 1 2 2 1 0 0 0\n0 0 0 1 x x 1 0 0 0\n0 0 0 1 2 2 1 0 0 0\n0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 0\nx 1 0 1 x 1 0 0 0 0\n2 3 1 3 2 2 1 1 1 0\nx 2 x 2 x 1 1 x 2 1\n1 2 1 2 1 1 1 2 x 1\n0 0 1 1 1 0 0 1 1 1\n0 0 1 x 1 1 1 2 2 2\n0 0 1 1 1 1 x 2 x x\n0 0 0 0 0 1 1 2 2 2'
 function open(i, j) {
   if (resArr[i][j] == "x") {
-    console.log(`opened ${i} ${j} and found ${resArr[i][j]}`);
     throw "Opened a Mine!";
   } else {
-    console.log(`opened ${i} ${j} and found ${resArr[i][j]}`);
     return resArr[i][j];
   }
 }
