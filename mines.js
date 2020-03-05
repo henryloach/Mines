@@ -4,15 +4,14 @@ function main(map,n) {
 
   console.log("\nStarting configuration:\n");
   print(arr);
-  print(values);
 
   initActive();
 
   do {
     loop();
-    if (hasChanged == false && nMines != 0) {
+    if (hasChanged == false) {
       let n = activeElements.length;
-      while (n--) { // try templates
+      while (n-- && nMines > 0) { // try templates
         template1(activeElements[n][0], activeElements[n][1]);
         if (hasChanged == true) { updateValues(); break; }
         template2(activeElements[n][0], activeElements[n][1]);
@@ -770,7 +769,6 @@ function copyToNewArr(array) {
 let random = true;
 if (random) {
   var resArr = genRandom(20);
-  print(resArr);
   var arr = newEmpty(resArr.length, resArr[0].length);
   genPuzzle();
   var values = copyToNewArr(arr);
