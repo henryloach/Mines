@@ -4,6 +4,7 @@ function main(map,n) {
 
   console.log("\nStarting configuration:\n");
   print(arr);
+  print(values);
 
   initActive();
 
@@ -12,7 +13,6 @@ function main(map,n) {
     if (hasChanged == false && nMines != 0) {
       let n = activeElements.length;
       while (n--) { // try templates
-        if (hasChanged == true) { updateValues(); break; }
         template1(activeElements[n][0], activeElements[n][1]);
         if (hasChanged == true) { updateValues(); break; }
         template2(activeElements[n][0], activeElements[n][1]);
@@ -151,17 +151,6 @@ function updateValues() {
   while (n--) {
     let row = activeElements[n][0]; let col = activeElements[n][1];
     getValues(row, col);
-  }
-  //print(values);
-}
-
-function forceValues() {
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = 0; j < arr[0].length; j++) {
-      if (values[i][j] == "x") continue;
-      if (values[i][j] == "?") continue;
-      getValues(i, j);
-    }
   }
 }
 
@@ -706,6 +695,7 @@ var map=
 0 0 0 0 0 ? ? ? ? ?`,
 result=
 '0 0 0 0 0 0 0 1 1 1\n1 1 1 1 1 1 0 2 x 2\n1 x 2 2 x 1 0 2 x 2\n1 1 2 x 2 1 0 1 1 1\n0 0 2 2 2 1 1 1 0 0\n0 0 1 x 1 1 x 2 1 1\n0 0 1 1 2 2 2 3 x 2\n0 0 0 0 1 x 1 2 x 2\n0 0 0 0 1 1 1 1 1 1\n0 0 0 1 2 2 1 0 0 0\n0 0 0 1 x x 1 0 0 0\n0 0 0 1 2 2 1 0 0 0\n0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 0\nx 1 0 1 x 1 0 0 0 0\n2 3 1 3 2 2 1 1 1 0\nx 2 x 2 x 1 1 x 2 1\n1 2 1 2 1 1 1 2 x 1\n0 0 1 1 1 0 0 1 1 1\n0 0 1 x 1 1 1 2 2 2\n0 0 1 1 1 1 x 2 x x\n0 0 0 0 0 1 1 2 2 2'
+
 function open(i, j) {
   if (resArr[i][j] == "x") {
     throw "Opened a Mine!";
@@ -765,35 +755,39 @@ function newEmpty(height, width) {
   return newArr
 }
 
-var resArr = strToArr(result);
-//golobals
-var arr = strToArr(map);
-var values = strToArr(map);
-var adjUnknowns = strToArr(map);
-var numUnknowns = initUnknowns();
-var activeElements = [];
-var hasChanged = false;
-var nMines = countMines();
+function copyToNewArr(array) {
+  let retArr = [];
+  for (let i = 0; i < array.length; i++) {
+    let row = []
+    retArr.push(row);
+    for (let j = 0; j < array[i].length; j++) {
+      retArr[i].push(array[i][j]);
+    }
+  }
+  return retArr;
+}
 
-// var random = false;
-// if (random == true) {
-//   show(resArr);/////WWWTTTTFFFFFF!!!!
-//   resArr = genRandom(31); /////WWWTTTTFFFFFF!!!!
-// show(resArr); /////WWWTTTTFFFFFF!!!!
-//   arr = newEmpty(resArr.length, resArr[0].length);
-//   show(resArr);/////WWWTTTTFFFFFF!!!!
-//   genPuzzle();
-//   values = newEmpty(resArr.length, resArr[0].length);
-//   adjUnknowns = newEmpty(resArr.length, resArr[0].length);
-//   nMines = countMines();
-// }
-
-// console.log("before start");
-// console.log("resArr:");
-// show(resArr);
-// console.log("arr:");
-// show(arr);
-// console.log("values:");
-// show(values);
+let random = true;
+if (random) {
+  var resArr = genRandom(20);
+  print(resArr);
+  var arr = newEmpty(resArr.length, resArr[0].length);
+  genPuzzle();
+  var values = copyToNewArr(arr);
+  var adjUnknowns = copyToNewArr(arr);
+  var numUnknowns = initUnknowns()
+  var activeElements = [];
+  var hasChanged = false;
+  var nMines = countMines();
+} else {
+  var resArr = strToArr(result);
+  var arr = strToArr(map);
+  var values = strToArr(map);
+  var adjUnknowns = strToArr(map);
+  var numUnknowns = initUnknowns();
+  var activeElements = [];
+  var hasChanged = false;
+  var nMines = countMines();
+}
 
 main(map, nMines);
