@@ -21,9 +21,8 @@ function main(map,n) {
       }
 
       // Try final solver.
-      if (hasChanged == false && nMines <= 5) { console.log("Trying final."); tryFinal(); }
+      if (hasChanged == false && nMines <= 5) { tryFinal(); }
     }
-
   } while (hasChanged == true && numUnknowns > 0);
 
   console.log("\nResult:\n");
@@ -36,7 +35,7 @@ function main(map,n) {
     console.log("..?..");
     console.log("\nFinal state:\n");
     print(arr);
-    console.log(`Mines remaining: ${nMines}`);
+    console.log(`Mines remaining: ${nMines}\n`);
     return "?";
   }
 }
@@ -75,8 +74,7 @@ function setSafe(row, col) {
 function openTile(row, col) {
   if (arr[row][col] == "x") throw "trying to open tile already marked as mine!"
   else if (arr[row][col] != "?") {
-    console.log(`trying to reopen open square at row: ${row} col: ${col}`);
-    return;
+    throw `trying to reopen open square at row: ${row} col: ${col}`;
   }
   arr[row][col] = open(row, col);
   values[row][col] = open(row, col);
@@ -124,9 +122,7 @@ function setMines(row, col) {
 }
 
 function markMine(row, col) {
-  if (arr[row][col] != "?") {
-    return;
-  }
+  if (arr[row][col] != "?") throw "marking something not ?";
   arr[row][col] = "x";
   values[row][col] = "x";
   nMines -= 1;
@@ -218,7 +214,7 @@ function template2(row, col) {
   if ( values[row][col] != 2 ) return;
 
   flag = true;
-  if  ( !isOne(row, col - 1)     ) flag = false;
+  if  ( !isOne(row, col - 1 )     ) flag = false;
   else if  ( !notHidden(row, col + 1) ) flag = false;
   if ( (flag) && aboveOpen(row, col) && belowBlocked(row, col) ) {
     markMine(row - 1, col + 1); return; }
@@ -226,7 +222,7 @@ function template2(row, col) {
     markMine(row + 1, col + 1); return; }
 
   flag = true;
-  if  ( !isOne(row, col + 1)     ) flag = false;
+  if  ( !isOne(row, col + 1 )     ) flag = false;
   else if  ( !notHidden(row, col - 1) ) flag = false;
   if ( (flag) && aboveOpen(row, col) && belowBlocked(row, col) ) {
     markMine(row - 1, col - 1); return; }
@@ -234,7 +230,7 @@ function template2(row, col) {
     markMine(row + 1, col - 1); return; }
 
   flag = true;
-  if  ( !isOne(row - 1, col)     ) flag = false;
+  if  ( !isOne(row - 1, col )     ) flag = false;
   else if  ( !notHidden(row + 1, col) ) flag = false;
   if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
     markMine(row + 1, col + 1); return; }
@@ -242,8 +238,8 @@ function template2(row, col) {
     markMine(row + 1, col - 1); return; }
 
   flag = true;
-  if  ( !isOne(row + 1, col)     ) flag = false;
-  else if  ( !notHidden(row + 1, col) ) flag = false;
+  if  ( !isOne(row + 1, col )     ) flag = false;
+  else if  ( !notHidden(row - 1, col) ) flag = false;
   if ( (flag) && rightOpen(row, col) && leftBlocked(row, col) ) {
     markMine(row - 1, col + 1); return; }
   if ( (flag) && leftOpen(row, col) && rightBlocked(row, col) ) {
@@ -297,22 +293,21 @@ function template3(row ,col) {
   }
 
   flag = true; //vert dwown
-  if      (checkBounds(row - 1, col) != true ||  values[row - 1][col] != 2) flag = false;
-  else if (checkBounds(row - 2, col) != true ||  values[row - 2][col] != 1) flag = false;
-  else if (checkBounds(row + 1, col) != true ||  values[row + 1][col] != 1) flag = false;
+  if      (checkBounds(row + 1, col) != true ||  values[row + 1][col] != 2) flag = false;
+  else if (checkBounds(row + 2, col) != true ||  values[row + 2][col] != 1) flag = false;
+  else if (checkBounds(row - 1, col) != true ||  values[row - 1][col] != 1) flag = false;
   else if (leftOpen(row, col) == true && leftOpen(row, col) == true
   && rightBlocked(row - 1, col) == true && rightBlocked(row - 1, col) == true) {
-    if (flag == true) { markMine(row, col - 1); markMine(row - 1, col - 1); return }
+    if (flag == true) { markMine(row, col - 1); markMine(row + 1, col - 1); return }
   }
   else if (rightOpen(row, col) == true && rightOpen(row, col - 1) == true
   && leftBlocked(row, col) == true && leftBlocked(row, col - 1) == true) {
-    if (flag == true) { markMine(row, col + 1); markMine(row - 1, col + 1); return }
+    if (flag == true) { markMine(row, col + 1); markMine(row + 1, col + 1); return }
   }
 }
 
 function tryFinal() {
   let remUnks = getRemainingUnknowns();
-
   if (remUnks.length == nMines) { // if remaining unmarked squares = num mines, fill them in
     for (let m = 0; m < remUnks.length; m++) {
       let mine = remUnks[m];
@@ -669,35 +664,45 @@ function countMines() { //// DEBUG:
 }
 
 var map=
-`0 0 0 0 0 0 0 ? ? ?
-? ? ? ? ? ? 0 ? ? ?
-? ? ? ? ? ? 0 ? ? ?
-? ? ? ? ? ? 0 ? ? ?
-0 0 ? ? ? ? ? ? 0 0
-0 0 ? ? ? ? ? ? ? ?
-0 0 ? ? ? ? ? ? ? ?
-0 0 0 0 ? ? ? ? ? ?
-0 0 0 0 ? ? ? ? ? ?
-0 0 0 ? ? ? ? 0 0 0
-0 0 0 ? ? ? ? 0 0 0
-0 0 0 ? ? ? ? 0 0 0
-0 0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0 0
-? ? 0 ? ? ? 0 0 0 0
-? ? 0 ? ? ? 0 0 0 0
-? ? ? ? ? ? ? ? ? 0
-? ? ? ? ? ? ? ? ? ?
-? ? ? ? ? ? ? ? ? ?
-0 0 ? ? ? 0 0 ? ? ?
-0 0 ? ? ? ? ? ? ? ?
-0 0 ? ? ? ? ? ? ? ?
-0 0 0 0 0 ? ? ? ? ?`,
+`0 0 0 0 0 0 0 0 0 0 ? ? ? ?
+? ? ? ? 0 0 0 0 0 0 ? ? ? ?
+? ? ? ? 0 0 0 ? ? ? ? ? ? ?
+? ? ? ? ? ? ? ? ? ? ? ? ? ?
+? ? ? ? ? ? ? ? ? ? ? ? ? ?
+? ? ? ? ? ? ? ? ? 0 0 0 0 0
+? ? ? ? ? 0 ? ? ? ? ? ? ? 0
+? ? ? ? ? 0 ? ? ? ? ? ? ? 0
+? ? ? ? ? ? ? ? ? ? ? ? ? 0
+? ? ? 0 0 ? ? ? ? ? ? ? 0 0
+0 0 0 0 0 ? ? ? ? ? ? ? ? 0
+0 0 ? ? ? ? ? ? ? ? ? ? ? ?
+0 0 ? ? ? ? ? ? ? ? ? ? ? ?
+? ? ? ? ? ? ? ? ? ? ? ? ? ?
+? ? ? ? ? 0 0 0 ? ? ? 0 ? ?
+? ? ? ? ? ? ? ? ? ? ? 0 0 0
+0 0 ? ? ? ? ? ? ? ? ? 0 0 0`,
 result=
-'0 0 0 0 0 0 0 1 1 1\n1 1 1 1 1 1 0 2 x 2\n1 x 2 2 x 1 0 2 x 2\n1 1 2 x 2 1 0 1 1 1\n0 0 2 2 2 1 1 1 0 0\n0 0 1 x 1 1 x 2 1 1\n0 0 1 1 2 2 2 3 x 2\n0 0 0 0 1 x 1 2 x 2\n0 0 0 0 1 1 1 1 1 1\n0 0 0 1 2 2 1 0 0 0\n0 0 0 1 x x 1 0 0 0\n0 0 0 1 2 2 1 0 0 0\n0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 0\nx 1 0 1 x 1 0 0 0 0\n2 3 1 3 2 2 1 1 1 0\nx 2 x 2 x 1 1 x 2 1\n1 2 1 2 1 1 1 2 x 1\n0 0 1 1 1 0 0 1 1 1\n0 0 1 x 1 1 1 2 2 2\n0 0 1 1 1 1 x 2 x x\n0 0 0 0 0 1 1 2 2 2'
+`0 0 0 0 0 0 0 0 0 0 2 x x 1
+1 2 2 1 0 0 0 0 0 0 2 x 4 2
+2 x x 1 0 0 0 1 2 3 3 3 4 x
+2 x 3 2 1 1 1 2 x x x 2 x x
+1 2 2 2 x 1 1 x 3 3 2 2 2 2
+1 2 x 3 2 1 1 1 1 0 0 0 0 0
+x 2 3 x 2 0 1 1 1 1 2 2 1 0
+2 2 3 x 2 0 1 x 2 2 x x 1 0
+1 x 2 1 1 1 2 3 x 2 2 2 1 0
+1 1 1 0 0 1 x 3 2 3 1 1 0 0
+0 0 0 0 0 1 1 2 x 2 x 2 1 0
+0 0 1 2 2 2 1 2 1 3 4 x 3 1
+0 0 2 x x 2 x 1 1 2 x x x 2
+2 2 4 x 4 2 1 1 1 x 3 3 3 x
+x x 4 x 3 0 0 0 2 2 2 0 1 1
+2 2 3 x 2 1 1 1 1 x 1 0 0 0
+0 0 1 1 1 1 x 1 1 1 1 0 0 0`
 
 function open(i, j) {
   if (resArr[i][j] == "x") {
-    throw "Opened a Mine!";
+    throw `Opened a Mine! at row: ${i} col: ${j}`;
   } else {
     return resArr[i][j];
   }
